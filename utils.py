@@ -2,7 +2,9 @@ import os
 
 def get_db_path():
     """Определяет путь к файлу БД."""
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "meal_planner.db")
+    # Используем домашнюю директорию пользователя для хранения БД
+    # Это обеспечивает, что exe имеет права на запись
+    return os.path.join(os.path.expanduser("~"), "meal_planner.db")
 
 def input_int(prompt, min_val=None, max_val=None):
     """Безопасный ввод целого числа."""
