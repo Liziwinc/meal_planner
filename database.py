@@ -7,7 +7,8 @@ def init_db(conn):
         CREATE TABLE IF NOT EXISTS dishes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
-            type TEXT CHECK(type IN ('завтрак', 'обед', 'ужин')) NOT NULL
+            type TEXT CHECK(type IN ('завтрак', 'обед')) NOT NULL,
+            calories INTEGER NOT NULL
         )
     ''')
     cursor.execute('''
@@ -21,7 +22,6 @@ def init_db(conn):
             dish_id INTEGER NOT NULL,
             ingredient_id INTEGER NOT NULL,
             grams INTEGER NOT NULL,
-            calories_per_portion INTEGER NOT NULL,
             FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE,
             FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
             PRIMARY KEY (dish_id, ingredient_id)
@@ -29,26 +29,28 @@ def init_db(conn):
     ''')
     conn.commit()
 
-def add_dish(conn, name, dish_type, ingredients):
+def add_dish(conn, name, dish_type, calories, ingredients):
     """Вставка блюда и его ингредиентов."""
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO dishes (name, type) VALUES (?, ?)", (name, dish_type))
+        cursor.execute(
+            "INSERT INTO dishes (name, type, calories) VALUES (?, ?, ?)",
+            (name, dish_type, calories)
+        )
         dish_id = cursor.lastrowid
         
         for ing in ingredients:
             ing_name = ing['name']
             grams = ing['grams']
-            cals = ing['calories']
             
             cursor.execute("INSERT OR IGNORE INTO ingredients (name) VALUES (?)", (ing_name,))
             cursor.execute("SELECT id FROM ingredients WHERE name = ?", (ing_name,))
             ingredient_id = cursor.fetchone()[0]
             
             cursor.execute("""
-                INSERT INTO dish_ingredients (dish_id, ingredient_id, grams, calories_per_portion)
-                VALUES (?, ?, ?, ?)
-            """, (dish_id, ingredient_id, grams, cals))
+                INSERT INTO dish_ingredients (dish_id, ingredient_id, grams)
+                VALUES (?, ?, ?)
+            """, (dish_id, ingredient_id, grams))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
@@ -58,7 +60,7 @@ def add_dish(conn, name, dish_type, ingredients):
 def get_all_dishes(conn):
     """Возвращает список всех блюд."""
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, type FROM dishes")
+    cursor.execute("SELECT id, name, type, calories FROM dishes")
     return cursor.fetchall()
 
 def get_dishes_by_type(conn, dish_type):
@@ -68,10 +70,10 @@ def get_dishes_by_type(conn, dish_type):
     return cursor.fetchall()
 
 def get_dish_details(conn, dish_id):
-    """Возвращает ингредиенты конкретного блюда."""
+    """Возвращает ингредиенты конкретного блюда (только названия и граммы)."""
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT i.name, di.grams, di.calories_per_portion
+        SELECT i.name, di.grams
         FROM dish_ingredients di
         JOIN ingredients i ON di.ingredient_id = i.id
         WHERE di.dish_id = ?

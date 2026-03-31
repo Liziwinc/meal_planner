@@ -1,48 +1,48 @@
-# name: Build executables for Windows, Linux, macOS
+name: Build executables for Windows, Linux, macOS
 
-# on:
-#   push:
-#     branches: [ main ]
-#   workflow_dispatch:    # позволяет запускать вручную
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:    # позволяет запускать вручную
 
-# jobs:
-#   build:
-#     strategy:
-#       matrix:
-#         os: [windows-latest, ubuntu-latest, macos-latest]
-#         include:
-#           - os: windows-latest
-#             artifact_name: meal-planner-windows.exe
-#             pyinstaller_args: --onefile --console main.py
-#           - os: ubuntu-latest
-#             artifact_name: meal-planner-linux
-#             pyinstaller_args: --onefile --console main.py
-#           - os: macos-latest
-#             artifact_name: meal-planner-macos
-#             pyinstaller_args: --onefile --console main.py
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            artifact_name: meal-planner-windows.exe
+            pyinstaller_args: --onefile --console main.py
+          - os: ubuntu-latest
+            artifact_name: meal-planner-linux
+            pyinstaller_args: --onefile --console main.py
+          - os: macos-latest
+            artifact_name: meal-planner-macos
+            pyinstaller_args: --onefile --console main.py
 
-#     runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Set up Python
-#         uses: actions/setup-python@v5
-#         with:
-#           python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-#       - name: Install dependencies
-#         run: |
-#           pip install pyinstaller
-#           pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+          pip install -r requirements.txt
 
-#       - name: Build executable with PyInstaller
-#         run: |
-#           pyinstaller ${{ matrix.pyinstaller_args }}
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller ${{ matrix.pyinstaller_args }}
 
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: ${{ matrix.artifact_name }}
-#           path: dist/main* # PyInstaller создаёт файл без расширения на Linux/macOS и .exe на Windows
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/main* # PyInstaller создаёт файл без расширения на Linux/macOS и .exe на Windows
