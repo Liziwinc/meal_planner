@@ -4,7 +4,6 @@ import math
 from database import init_db, add_dish, get_all_dishes, get_dishes_by_type, get_dish_details, delete_dish
 from utils import get_db_path, input_int, print_table
 
-# Исправление кодировки для Windows консоли
 if sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -20,7 +19,7 @@ def menu_add_dish(conn):
 
     calories = input_int("\nВведите общую калорийность блюда (на порцию): ", 0)
 
-    ing_count = input_int("\nСколько ингредиентов будет для одной порции? ", 1, 100)
+    ing_count = input_int("\nСколько ингредиентов будет для одной порции? - ", 1, 100)
     ingredients = []
     
     for i in range(1, ing_count + 1):
@@ -47,14 +46,13 @@ def menu_create_plan(conn):
     days = input_int("Введите количество дней: ", 1, 30)
     meal_multiply = input_int("\nВведите количество порций на один прием пищи: ",1,4)
     
-    # Порядок приёмов пищи: завтрак, обед, ужин
     meals = [
         ('завтрак', 'завтрак'),    # (отображаемое имя, тип в БД)
         ('обед', 'обед'),
         ('ужин', 'обед')
     ]
-    selected_dishes_info = []   # (день, приём, название_блюда)
-    selected_dish_ids = []      # id выбранных блюд
+    selected_dishes_info = []
+    selected_dish_ids = []
 
     for day in range(1, days + 1):
         print(f"\nДень {day}:")
@@ -68,20 +66,22 @@ def menu_create_plan(conn):
 
             print("Доступные блюда:")
             for idx, dish in enumerate(available, 1):
-                print(f"{idx}. {dish[1]}")
+                print(f"{idx}. {dish[1]} ({dish[2]} ккал)")
             
             choice = input_int("Выберите блюдо (введите номер): ", 1, len(available))
             selected_dish = available[choice - 1]
             
-            selected_dishes_info.append((day, meal_name, selected_dish[1]))
+            selected_dishes_info.append((day, meal_name, selected_dish[1], selected_dish[2]))
             selected_dish_ids.append(selected_dish[0])
 
     print("\n=== Ваш рацион ===")
     for day in range(1, days + 1):
         print(f"День {day}:")
         day_meals = [info for info in selected_dishes_info if info[0] == day]
+        total_calories = sum(meal[3] for meal in day_meals) * meal_multiply
         for meal in day_meals:
             print(f"  {meal[1].capitalize()}: {meal[2]}")
+        print(f"  Итого калорий: {total_calories}")
 
     print("\n=== Список покупок ===")
     shopping_list = {}
@@ -92,7 +92,6 @@ def menu_create_plan(conn):
             name, grams = item
             shopping_list[name] = shopping_list.get(name, 0) + grams
 
-    # Сортировка по алфавиту и округление веса до 10 грамм
     for name in sorted(shopping_list.keys()):
         raw_grams = shopping_list[name]
         final_grams = raw_grams * meal_multiply

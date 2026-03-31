@@ -1,7 +1,6 @@
 import sqlite3
 
 def init_db(conn):
-    """Создание таблиц."""
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS dishes (
@@ -30,7 +29,7 @@ def init_db(conn):
     conn.commit()
 
 def add_dish(conn, name, dish_type, calories, ingredients):
-    """Вставка блюда и его ингредиентов."""
+    """Вставка блюда и его ингредиентов"""
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -58,19 +57,19 @@ def add_dish(conn, name, dish_type, calories, ingredients):
         return False
 
 def get_all_dishes(conn):
-    """Возвращает список всех блюд."""
+    """Возвращает список всех блюд"""
     cursor = conn.cursor()
     cursor.execute("SELECT id, name, type, calories FROM dishes")
     return cursor.fetchall()
 
 def get_dishes_by_type(conn, dish_type):
-    """Возвращает блюда заданного типа."""
+    """Возвращает блюда заданного типа"""
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM dishes WHERE type = ?", (dish_type,))
+    cursor.execute("SELECT id, name, calories FROM dishes WHERE type = ?", (dish_type,))
     return cursor.fetchall()
 
 def get_dish_details(conn, dish_id):
-    """Возвращает ингредиенты конкретного блюда (только названия и граммы)."""
+    """Возвращает ингредиенты конкретного блюда"""
     cursor = conn.cursor()
     cursor.execute("""
         SELECT i.name, di.grams
@@ -81,7 +80,7 @@ def get_dish_details(conn, dish_id):
     return cursor.fetchall()
 
 def delete_dish(conn, dish_id):
-    """Удаление блюда."""
+    """Удаление блюда"""
     cursor = conn.cursor()
     cursor.execute("DELETE FROM dishes WHERE id = ?", (dish_id,))
     conn.commit()

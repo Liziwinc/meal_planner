@@ -1,13 +1,11 @@
 import os
 
 def get_db_path():
-    """Определяет путь к файлу БД."""
-    # Используем домашнюю директорию пользователя для хранения БД
-    # Это обеспечивает, что exe имеет права на запись
+    """Определяет путь к файлу БД"""
     return os.path.join(os.path.expanduser("~"), "meal_planner.db")
 
 def input_int(prompt, min_val=None, max_val=None):
-    """Безопасный ввод целого числа."""
+    """Безопасный ввод целого числа"""
     while True:
         try:
             val = int(input(prompt))
@@ -22,7 +20,7 @@ def input_int(prompt, min_val=None, max_val=None):
             print("Пожалуйста, введите целое число.")
 
 def print_table(headers, rows):
-    """Форматированный вывод таблицы."""
+    """Форматированный вывод таблицы"""
     if not rows:
         print("Нет данных.")
         return
