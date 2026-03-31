@@ -3,7 +3,7 @@ name: Build executables for Windows, Linux, macOS
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:    # позволяет запускать вручную
+  workflow_dispatch:
 
 jobs:
   build:
@@ -35,7 +35,16 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pyinstaller
-          pip install -r requirements.txt
+          # Если requirements.txt существует, установить зависимости
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+        shell: bash
+
+      - name: List files (debug)
+        run: |
+          echo "Files in repository:"
+          ls -la
 
       - name: Build executable with PyInstaller
         run: |
@@ -45,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/main* # PyInstaller создаёт файл без расширения на Linux/macOS и .exe на Windows
+          path: dist/main*   # PyInstaller создаёт файл без расширения на Linux/macOS и .exe на Windows
